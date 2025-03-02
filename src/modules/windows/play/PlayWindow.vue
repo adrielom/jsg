@@ -3,9 +3,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { useEngine2D } from "@/shared/stores/engine2D";
+import { onMounted, ref } from "vue";
 
-const playWindow = ref();
+const playWindow = ref(null);
+const engine = useEngine2D();
 
-onMounted(() => {});
+onMounted(async () => {
+  engine.start(playWindow.value! as HTMLElement);
+});
 </script>

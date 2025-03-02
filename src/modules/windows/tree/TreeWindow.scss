@@ -1,0 +1,19 @@
+.hierarchy {
+	background-color: orange;
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	margin: 0.3rem;
+	.treeview {
+		margin: 0.3rem;
+	}
+	.label {
+		display: flex;
+		justify-content: center;
+	}
+	.button {
+		display: flex;
+		justify-content: center;
+		margin: 1rem;
+	}
+}

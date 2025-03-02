@@ -1,6 +1,6 @@
 import { Render, Mouse } from "matter-js";
-import type { IEngine2D } from "./types/IEngine2D";
-import type { IRender2D } from "./types/IRender2D";
+import type { IEngine2D } from "../types/IEngine2D";
+import type { IRender2D } from "../types/IRender2D";
 
 export class RenderFactory {
   engine: IEngine2D | null = null;
