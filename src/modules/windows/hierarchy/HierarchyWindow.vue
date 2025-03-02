@@ -117,4 +117,4 @@ const addNewObject = () => {
 };
 </script>
 
-<style lang="scss" src="./TreeWindow.scss"></style>
+<style lang="scss" src="./HierarchyWindow.scss"></style>

@@ -1,15 +1,15 @@
 <template>
   <div class="main">
-    <TreeWindow class="treeWindow" />
+    <HierarchyWindow class="treeWindow" />
     <PlayWindow class="playWindow" />
     <InspectorWindow class="inspectorWindow" />
   </div>
 </template>
 
 <script setup lang="ts">
-import TreeWindow from "@/modules/windows/tree/TreeWindow.vue";
-import PlayWindow from "../../modules/windows/play/PlayWindow.vue";
+import HierarchyWindow from "@/modules/windows/hierarchy/HierarchyWindow.vue";
 import InspectorWindow from "@/modules/windows/inspector/InspectorWindow.vue";
+import PlayWindow from "../../modules/windows/play/PlayWindow.vue";
 </script>
 
 <style lang="scss">

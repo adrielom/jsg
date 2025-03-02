@@ -14,7 +14,7 @@ export class RigidBody2D implements Cell {
   }
 
   public isKinematic(): boolean {
-    return this._body.isStatic;
+    return this._body.isStatic ?? false;
   }
 
   public toggleKinematic() {

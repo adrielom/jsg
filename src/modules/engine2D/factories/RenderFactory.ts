@@ -1,4 +1,4 @@
-import { Render, Mouse } from "matter-js";
+import { Render, Mouse, type IRendererOptions } from "matter-js";
 import type { IEngine2D } from "../types/IEngine2D";
 import type { IRender2D } from "../types/IRender2D";
 
@@ -13,11 +13,12 @@ export class RenderFactory {
     this.element = _element;
   }
 
-  create() {
+  create(options?: IRendererOptions) {
     try {
       return Render.create({
         element: this.element!,
         engine: this.engine!,
+        options: options ?? {},
       });
     } catch (e) {
       throw new Error("Not able to create render " + (e as Error).message);
