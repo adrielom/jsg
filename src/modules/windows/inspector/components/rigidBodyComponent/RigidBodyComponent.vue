@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { ref, type PropType } from "vue";
 import DefaultComponent from "../defaultComponent.vue";
-import type { RigidBody2D } from "@/modules/engine2D/models/RigidBody2D";
+import type { RigidBodyComponent } from "@/modules/engine2D/components/RigidBodyComponent";
 
 const props = defineProps({
   rigidbody: {
-    type: Object as PropType<RigidBody2D> | null,
+    type: Object as PropType<RigidBodyComponent> | null,
     required: true,
   },
 });
 
-const isStatic = ref<boolean | null>(props.rigidbody.isKinematic());
+const isStatic = ref<boolean | null>(props.rigidbody?.isKinematic() ?? false);
 
 console.log(props.rigidbody);
 </script>

@@ -8,12 +8,12 @@ export const useEngine2D = defineStore("engine2D", () => {
 
   const setTargetElement = (element: HTMLElement) => {
     targetElement.value = element;
+    engine2D.value = new Engine2D(element);
   };
 
   const start = (_targetElement?: HTMLElement) => {
     if (_targetElement) {
-      targetElement.value = _targetElement;
-      engine2D.value = new Engine2D(targetElement.value);
+      setTargetElement(_targetElement);
     }
     if (engine2D.value) {
       engine2D.value.start();

@@ -104,16 +104,31 @@ const onNodeClick = (e: unknown) => {
   hierarchy.setSelected(selectedGO);
 };
 
-const deleteObject = (item: any) => {
-  console.log(item);
+const deleteObject = () => {
+  if (!selectedItem.value) return;
+  
+  const { engine2D } = engine;
+  const success = engine2D?.removeGameObjectById(selectedItem.value.id);
+  
+  if (success) {
+    // Clear selection if deleted object was selected
+    const currentSelected = hierarchy.getSelected();
+    if (currentSelected?.hash === selectedItem.value.id) {
+      hierarchy.setSelected(null);
+    }
+  }
+  
+  rightClickMenu.value?.closeMenu();
 };
 
 const addNewObject = () => {
-  const gO = gOFactory.create();
   const { engine2D } = engine;
-  gO.rigidBody?.toggleKinematic();
+  if (!engine2D) return;
+  
+  const gO = engine2D.createGameObjectWithPhysics("GameObject", EnumGeometry.Circle, 20);
+  const rigidBodyComponent = gO.getComponent("RigidBody");
+  rigidBodyComponent?.toggleKinematic();
   gO.Position = new Vector2(400, 350);
-  engine2D?.addGameObject(gO);
 };
 </script>
 

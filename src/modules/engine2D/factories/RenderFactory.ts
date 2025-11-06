@@ -16,9 +16,18 @@ export class RenderFactory {
   create(options?: IRendererOptions) {
     try {
       return Render.create({
-        element: this.element!,
+        canvas: this.element as HTMLCanvasElement,
         engine: this.engine!,
-        options: options ?? {},
+        options: {
+          width: 800,
+          height: 600,
+          wireframes: false,
+          background: 'transparent',
+          showVelocity: false,
+          showAngleIndicator: false,
+          showDebug: false,
+          ...options
+        },
       });
     } catch (e) {
       throw new Error("Not able to create render " + (e as Error).message);

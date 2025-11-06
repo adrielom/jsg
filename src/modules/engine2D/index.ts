@@ -1,26 +1,22 @@
-import { Composites, Engine as MatterEngine, Render, Runner } from "matter-js";
-import type { IEngine2D } from "./types/IEngine2D";
-import { RenderFactory } from "./factories/RenderFactory";
+// Export main Engine2D class
+export { default } from "./Engine2D";
 
-class Engine {
-  engine: IEngine2D;
-  runner: Runner | null = null;
-  htmlElement: HTMLElement;
-  composites: Composites[];
+// Export core models
+export * from "./models/GameObject";
+export * from "./models/Tree";
+export * from "./models/Component";
 
-  constructor(_htmlElement: HTMLElement) {
-    this.engine = MatterEngine.create();
-    this.htmlElement = _htmlElement;
-    this.runner = Runner.create();
-    this.composites = [];
-  }
+// Export components
+export * from "./components";
 
-  getRender(htmlElement: HTMLElement) {
-    return new RenderFactory(this.engine, htmlElement).create();
-  }
+// Export managers
+export * from "./managers/GameObjectManager";
 
-  start() {
-    Render.run(this.getRender(this.htmlElement));
-    Runner.run(this.runner!, this.engine);
-  }
-}
+// Export registry
+export * from "./registry/ComponentRegistry";
+
+// Export factories
+export * from "./factories/GameObjectFactory";
+
+// Export enums
+export { default as EnumGeometry } from "./enums/EnumGeometry";
