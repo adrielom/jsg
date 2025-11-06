@@ -14,6 +14,25 @@
             <span>Transform</span>
           </div>
           <PositionComponent v-model="selectedGOPosition" @change="setPosition" />
+          <div class="scale-section">
+            <h4>Scale</h4>
+            <div class="scale-inputs">
+              <v-text-field
+                v-model.number="scaleX"
+                label="X"
+                type="number"
+                step="0.1"
+                density="compact"
+              />
+              <v-text-field
+                v-model.number="scaleY"
+                label="Y"
+                type="number"
+                step="0.1"
+                density="compact"
+              />
+            </div>
+          </div>
         </div>
         
         <!-- RigidBody Component -->
@@ -23,6 +42,15 @@
             <v-btn size="small" @click="removeComponent('RigidBody')">Remove</v-btn>
           </div>
           <RigidBodyComponent :rigidbody="rigidBodyComponent" />
+        </div>
+        
+        <!-- Sprite Component -->
+        <div class="component-item" v-if="spriteComponent">
+          <div class="component-header">
+            <span>Sprite</span>
+            <v-btn size="small" @click="removeComponent('Sprite')">Remove</v-btn>
+          </div>
+          <SpriteComponent :sprite="spriteComponent" />
         </div>
         
         <!-- Other Components -->
@@ -59,14 +87,15 @@
 
 <script lang="ts" setup>
 import useWindows from "@/shared/stores/windows";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import PositionComponent from "./components/positionComponent/PositionComponent.vue";
 import { Vector2 } from "@/modules/engine2D/models/Vector2";
 import RigidBodyComponent from "./components/rigidBodyComponent/RigidBodyComponent.vue";
-import type { RigidBodyComponent as RigidBodyComp } from "@/modules/engine2D/components/RigidBodyComponent";
+import SpriteComponent from "./components/spriteComponent/SpriteComponent.vue";
 import { ComponentRegistry } from "@/modules/engine2D/registry/ComponentRegistry";
 import type { TransformComponent } from "@/modules/engine2D/components/TransformComponent";
 import type { RigidBodyComponent as RigidBodyComp } from "@/modules/engine2D/components/RigidBodyComponent";
+import type { SpriteComponent as SpriteComp } from "@/modules/engine2D/components/SpriteComponent";
 
 const { hierarchy } = useWindows();
 const selectedGO = computed(() => hierarchy.getSelected());
@@ -83,10 +112,16 @@ const rigidBodyComponent = computed(() =>
   selectedGO.value?.getComponent<RigidBodyComp>("RigidBody")
 );
 
+const rigidBody = computed(() => rigidBodyComponent.value);
+
+const spriteComponent = computed(() => 
+  selectedGO.value?.getComponent<SpriteComp>("Sprite")
+);
+
 const otherComponents = computed(() => {
   if (!selectedGO.value) return [];
   return selectedGO.value.getAllComponents().filter(
-    component => !['Transform', 'RigidBody'].includes(component.getName())
+    component => !['Transform', 'RigidBody', 'Sprite'].includes(component.getName())
   );
 });
 
@@ -100,6 +135,22 @@ const availableComponents = computed(() => {
 const selectedGOPosition = computed(() => {
   if (!selectedGO.value) return [0, 0];
   return Object.values(selectedGO.value.Position);
+});
+
+const scaleX = ref(transformComponent.value?.scale?.x || 1);
+const scaleY = ref(transformComponent.value?.scale?.y || 1);
+
+watch([scaleX, scaleY], ([newX, newY]) => {
+  if (transformComponent.value) {
+    transformComponent.value.scale = { x: newX, y: newY };
+  }
+});
+
+watch(transformComponent, (newTransform) => {
+  if (newTransform) {
+    scaleX.value = newTransform.scale?.x || 1;
+    scaleY.value = newTransform.scale?.y || 1;
+  }
 });
 
 const setPosition = (values: number[]) => {
@@ -142,6 +193,8 @@ const removeComponent = (componentName: string) => {
 <style lang="scss" scoped>
 .section {
   margin: 1rem;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .components-section {
@@ -171,5 +224,19 @@ const removeComponent = (componentName: string) => {
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid #eee;
+}
+
+.scale-section {
+  margin-top: 1rem;
+}
+
+.scale-section h4 {
+  margin-bottom: 0.5rem;
+  font-size: 14px;
+}
+
+.scale-inputs {
+  display: flex;
+  gap: 8px;
 }
 </style>

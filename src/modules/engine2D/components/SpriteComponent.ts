@@ -2,6 +2,7 @@ import { Component } from "../models/Component";
 
 export class SpriteComponent extends Component {
   private _texture: string | null = null;
+  private _imageUrl: string | null = null;
   private _color = "#ffffff";
   private _opacity = 1;
   private _visible = true;
@@ -16,6 +17,28 @@ export class SpriteComponent extends Component {
 
   set texture(value: string | null) {
     this._texture = value;
+  }
+
+  get imageUrl(): string | null {
+    return this._imageUrl;
+  }
+
+  set imageUrl(value: string | null) {
+    this._imageUrl = value;
+    if (value) {
+      this.loadImage(value);
+    }
+  }
+
+  private loadImage(url: string) {
+    const img = new Image();
+    img.onload = () => {
+      this._texture = url;
+    };
+    img.onerror = () => {
+      console.error(`Failed to load image: ${url}`);
+    };
+    img.src = url;
   }
 
   get color(): string {

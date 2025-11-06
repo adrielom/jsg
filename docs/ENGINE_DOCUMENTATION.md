@@ -522,6 +522,111 @@ engine.onUpdate((deltaTime) => {
 });
 ```
 
+### Angular Example
+
+```typescript
+import { Component, ElementRef, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import Engine2D, { EnumGeometry, Vector2 } from '@/modules/engine2D';
+
+@Component({
+  selector: 'app-game',
+  template: `<canvas #gameCanvas width="800" height="600"></canvas>`
+})
+export class GameComponent implements OnInit, OnDestroy {
+  @ViewChild('gameCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
+  
+  private engine!: Engine2D;
+  private unsubscribe?: () => void;
+  
+  ngOnInit() {
+    this.engine = new Engine2D(this.canvasRef.nativeElement);
+    this.engine.start();
+    
+    // Create game objects
+    const player = this.engine.createGameObjectWithPhysics("Player", EnumGeometry.Circle, 25);
+    player.Position = new Vector2(400, 300);
+    
+    // Game loop
+    this.unsubscribe = this.engine.onUpdate((deltaTime) => {
+      // Game logic here
+    });
+  }
+  
+  ngOnDestroy() {
+    this.unsubscribe?.();
+    this.engine?.stop();
+  }
+}
+```
+
+### Svelte Example
+
+```svelte
+<script>
+  import { onMount, onDestroy } from 'svelte';
+  import Engine2D, { EnumGeometry, Vector2 } from '@/modules/engine2D';
+  
+  let canvas;
+  let engine;
+  let unsubscribe;
+  
+  onMount(() => {
+    engine = new Engine2D(canvas);
+    engine.start();
+    
+    // Create game objects
+    const player = engine.createGameObjectWithPhysics("Player", EnumGeometry.Circle, 25);
+    player.Position = new Vector2(400, 300);
+    
+    // Game loop
+    unsubscribe = engine.onUpdate((deltaTime) => {
+      // Game logic here
+    });
+  });
+  
+  onDestroy(() => {
+    unsubscribe?.();
+    engine?.stop();
+  });
+</script>
+
+<canvas bind:this={canvas} width="800" height="600"></canvas>
+```
+
+### Solid.js Example
+
+```tsx
+import { onMount, onCleanup } from 'solid-js';
+import Engine2D, { EnumGeometry, Vector2 } from '@/modules/engine2D';
+
+function GameComponent() {
+  let canvas: HTMLCanvasElement;
+  let engine: Engine2D;
+  let unsubscribe: (() => void) | undefined;
+  
+  onMount(() => {
+    engine = new Engine2D(canvas);
+    engine.start();
+    
+    // Create game objects
+    const player = engine.createGameObjectWithPhysics("Player", EnumGeometry.Circle, 25);
+    player.Position = new Vector2(400, 300);
+    
+    // Game loop
+    unsubscribe = engine.onUpdate((deltaTime) => {
+      // Game logic here
+    });
+  });
+  
+  onCleanup(() => {
+    unsubscribe?.();
+    engine?.stop();
+  });
+  
+  return <canvas ref={canvas} width="800" height="600" />;
+}
+```
+
 ## 🎮 Complete Game Example
 
 ```typescript
@@ -633,6 +738,27 @@ useGameLoop(engine, (deltaTime) => {
 }, [dependencies]);
 // Reactive dependencies with Vue refs
 ```
+
+## 🌐 Framework Compatibility
+
+JSG Engine2D is **framework-agnostic** and works with any JavaScript framework or vanilla JS:
+
+- ✅ **React** - Use provided hooks for seamless integration
+- ✅ **Vue** - Use provided composables for reactive integration  
+- ✅ **Angular** - Standard lifecycle integration
+- ✅ **Svelte** - Simple onMount/onDestroy pattern
+- ✅ **Solid.js** - Works with Solid's reactive system
+- ✅ **Vanilla JS** - Direct engine usage without framework overhead
+- ✅ **Any Framework** - Just needs a canvas element and lifecycle management
+
+### Integration Pattern
+
+All frameworks follow the same pattern:
+1. **Get canvas reference** from DOM
+2. **Create Engine2D instance** with canvas
+3. **Call engine.start()** to begin
+4. **Register update callbacks** for game logic
+5. **Cleanup on unmount** with engine.stop()
 
 ## 📚 API Reference
 

@@ -40,7 +40,7 @@ export default class Engine2D {
   }
 
   getRender(htmlElement: HTMLElement) {
-    return new RenderFactory(this.engine, htmlElement).create();
+    return new RenderFactory(this.engine, htmlElement, this.tree.elements).create();
   }
 
   start() {
@@ -130,9 +130,6 @@ export default class Engine2D {
     return this.isRunning;
   }
 
-
-
-  // New enhanced methods using GameObjectManager
   createGameObject(name?: string): GameObject {
     const logger = Logger.getInstance();
     const gameObject = this.gameObjectManager.createGameObject(name);

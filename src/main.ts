@@ -8,7 +8,7 @@ import router from "./pages/router";
 import vuetify from "./vuetify";
 import SimpleGame from "../examples/SimpleGame.vue";
 
-const app = createApp(SimpleGame);
+const app = createApp(App);
 
 app.use(createPinia());
 app.use(vuetify);

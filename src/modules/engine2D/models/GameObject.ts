@@ -5,6 +5,8 @@ import { Transform } from "./Transform";
 import { Component } from "./Component";
 import { TransformComponent } from "../components/TransformComponent";
 import { RigidBodyComponent } from "../components/RigidBodyComponent";
+import { SpriteComponent } from "../components/SpriteComponent";
+import { ScriptComponent } from "../components/ScriptComponent";
 import { Logger } from "../utils/Logger";
 
 export class GameObject extends Transform {
@@ -77,6 +79,11 @@ export class GameObject extends Transform {
     return result;
   }
 
+  getComponent(componentName: "Transform"): TransformComponent | null;
+  getComponent(componentName: "RigidBody"): RigidBodyComponent | null;
+  getComponent(componentName: "Sprite"): SpriteComponent | null;
+  getComponent(componentName: "Script"): ScriptComponent | null;
+  getComponent<T extends Component>(componentName: string): T | null;
   getComponent<T extends Component>(componentName: string): T | null {
     return (this.components.get(componentName) as T) || null;
   }

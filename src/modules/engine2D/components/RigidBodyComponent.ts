@@ -21,12 +21,40 @@ export class RigidBodyComponent extends Component {
     this._body = value;
   }
 
-  isKinematic(): boolean {
+  get mass(): number {
+    return this._body.mass;
+  }
+
+  set mass(value: number) {
+    Body.setMass(this._body, Math.max(0.001, value));
+  }
+
+  get isKinematic(): boolean {
     return this._body.isStatic ?? false;
   }
 
-  toggleKinematic() {
-    this._body.isStatic = !this._body.isStatic;
+  set isKinematic(value: boolean) {
+    Body.setStatic(this._body, value);
+  }
+
+  applyForce(x: number, y: number) {
+    Body.applyForce(this._body, this._body.position, { x, y });
+  }
+
+  get velocity() {
+    return { x: this._body.velocity.x, y: this._body.velocity.y };
+  }
+
+  set velocity(value: { x: number; y: number }) {
+    Body.setVelocity(this._body, value);
+  }
+
+  get color(): string {
+    return this._body.render.fillStyle || '#ff6600';
+  }
+
+  set color(value: string) {
+    this._body.render.fillStyle = value;
   }
 
   isCollidingWith(otherBody: Body): boolean {

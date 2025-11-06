@@ -14,6 +14,7 @@ export class GameObjectManager {
   // Create operations
   createGameObject(name: string = "GameObject"): GameObject {
     const gameObject = GameObjectFactory.createEmpty(name);
+    gameObject.Position = { x: 400, y: 300 }; // Center of 800x600 canvas
     this.tree.add(gameObject);
     return gameObject;
   }
@@ -24,6 +25,7 @@ export class GameObjectManager {
     size: number = 10
   ): GameObject {
     const gameObject = GameObjectFactory.createWithRigidBody(name, geometry, size);
+    gameObject.Position = { x: 400, y: 300 }; // Center of 800x600 canvas
     
     // Set render colors for visibility and make static
     const rigidBody = gameObject.getComponent("RigidBody");

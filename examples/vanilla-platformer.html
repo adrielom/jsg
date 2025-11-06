@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSG Vanilla Platformer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #222;
+            color: white;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        canvas {
+            border: 2px solid #444;
+            background: #87CEEB;
+        }
+        
+        .controls {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            min-width: 200px;
+        }
+        
+        .controls h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        
+        .controls p {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            background: #444;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 JSG Vanilla Platformer</h1>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div class="controls">
+            <h3>Controls</h3>
+            <p><strong>A/D</strong> - Move Left/Right</p>
+            <p><strong>W/Space</strong> - Jump</p>
+            <p><strong>S</strong> - Duck (placeholder)</p>
+            
+            <div class="status">
+                <p>Player Position: <span id="position">0, 0</span></p>
+                <p>On Ground: <span id="grounded">false</span></p>
+                <p>Velocity: <span id="velocity">0, 0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import JSG Engine (adjust path as needed)
+        import Engine2D from '../src/modules/engine2D/Engine2D.js';
+        import { EnumGeometry } from '../src/modules/engine2D/enums/EnumGeometry.js';
+        import { ComponentRegistry } from '../src/modules/engine2D/registry/ComponentRegistry.js';
+        import { Vector2 } from '../src/modules/engine2D/models/Vector2.js';
+
+        class PlatformerGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.engine = new Engine2D(this.canvas);
+                this.player = null;
+                this.platforms = [];
+                this.keys = {};
+                
+                // Game settings
+                this.moveSpeed = 200;
+                this.jumpForce = 400;
+                this.gravity = 800;
+                
+                this.init();
+            }
+            
+            init() {
+                // Enable gravity for platformer physics
+                this.engine.engine.world.gravity.y = 1;
+                
+                this.engine.start();
+                this.createWorld();
+                this.setupControls();
+                this.startGameLoop();
+            }
+            
+            createWorld() {
+                // Create ground platform
+                const ground = this.engine.createGameObjectWithPhysics("Ground", EnumGeometry.Rectangle, 800);
+                ground.Position = new Vector2(400, 580);
+                const groundRb = ground.getComponent("RigidBody");
+                groundRb.body.isStatic = true;
+                groundRb.body.render.fillStyle = '#8B4513';
+                this.platforms.push(ground);
+                
+                // Create floating platforms
+                const platform1 = this.engine.createGameObjectWithPhysics("Platform1", EnumGeometry.Rectangle, 200);
+                platform1.Position = new Vector2(200, 450);
+                const p1Rb = platform1.getComponent("RigidBody");
+                p1Rb.body.isStatic = true;
+                p1Rb.body.render.fillStyle = '#654321';
+                this.platforms.push(platform1);
+                
+                const platform2 = this.engine.createGameObjectWithPhysics("Platform2", EnumGeometry.Rectangle, 150);
+                platform2.Position = new Vector2(600, 350);
+                const p2Rb = platform2.getComponent("RigidBody");
+                p2Rb.body.isStatic = true;
+                p2Rb.body.render.fillStyle = '#654321';
+                this.platforms.push(platform2);
+                
+                // Create player
+                this.player = this.engine.createGameObjectWithPhysics("Player", EnumGeometry.Rectangle, 30);
+                this.player.Position = new Vector2(100, 300);
+                
+                // Style player
+                const playerRb = this.player.getComponent("RigidBody");
+                playerRb.body.render.fillStyle = '#FF6B6B';
+                playerRb.body.render.strokeStyle = '#FF4757';
+                playerRb.body.render.lineWidth = 2;
+                playerRb.body.frictionAir = 0.01;
+                playerRb.body.friction = 0.8;
+                
+                // Add sprite component for visual enhancement
+                const sprite = ComponentRegistry.createSprite(null, '#FF6B6B');
+                sprite.opacity = 0.9;
+                this.player.addComponent(sprite);
+                
+                // Add player movement script
+                const playerScript = ComponentRegistry.createScript(`
+                    let isGrounded = false;
+                    let canJump = true;
+                    
+                    function update(deltaTime) {
+                        const rigidBody = gameObject.getComponent("RigidBody");
+                        const body = rigidBody.body;
+                        
+                        // Check if grounded
+                        const collidingBodies = rigidBody.getCollidingBodies();
+                        isGrounded = collidingBodies.some(otherBody => 
+                            otherBody.position.y > body.position.y + 10
+                        );
+                        
+                        // Reset jump if grounded
+                        if (isGrounded && body.velocity.y > -1) {
+                            canJump = true;
+                        }
+                        
+                        // Store state for UI
+                        gameObject.isGrounded = isGrounded;
+                        gameObject.canJump = canJump;
+                    }
+                    
+                    function handleMovement(direction) {
+                        const rigidBody = gameObject.getComponent("RigidBody");
+                        const body = rigidBody.body;
+                        
+                        // Apply horizontal force
+                        body.force.x = direction * 0.01;
+                    }
+                    
+                    function jump() {
+                        if (!canJump) return;
+                        
+                        const rigidBody = gameObject.getComponent("RigidBody");
+                        const body = rigidBody.body;
+                        
+                        // Apply upward impulse
+                        body.velocity.y = -15;
+                        canJump = false;
+                    }
+                    
+                    // Expose methods
+                    gameObject.handleMovement = handleMovement;
+                    gameObject.jump = jump;
+                `);
+                
+                this.player.addComponent(playerScript);
+            }
+            
+            setupControls() {
+                // Keyboard event listeners
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    
+                    // Jump on keydown for immediate response
+                    if ((e.key.toLowerCase() === 'w' || e.key === ' ') && this.player) {
+                        e.preventDefault();
+                        this.player.jump?.();
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                });
+            }
+            
+            startGameLoop() {
+                this.engine.onUpdate((deltaTime) => {
+                    this.updatePlayer(deltaTime);
+                    this.updateUI();
+                });
+            }
+            
+            updatePlayer(deltaTime) {
+                if (!this.player) return;
+                
+                // Handle continuous movement
+                let moveDirection = 0;
+                
+                if (this.keys['a']) moveDirection -= 1;
+                if (this.keys['d']) moveDirection += 1;
+                
+                if (moveDirection !== 0) {
+                    this.player.handleMovement?.(moveDirection);
+                }
+                
+                // Limit horizontal velocity
+                const playerRb = this.player.getComponent("RigidBody");
+                if (playerRb?.body) {
+                    const maxSpeed = 8;
+                    if (playerRb.body.velocity.x > maxSpeed) {
+                        playerRb.body.velocity.x = maxSpeed;
+                    } else if (playerRb.body.velocity.x < -maxSpeed) {
+                        playerRb.body.velocity.x = -maxSpeed;
+                    }
+                }
+            }
+            
+            updateUI() {
+                if (!this.player) return;
+                
+                const pos = this.player.Position;
+                const playerRb = this.player.getComponent("RigidBody");
+                
+                document.getElementById('position').textContent = 
+                    `${Math.round(pos.x)}, ${Math.round(pos.y)}`;
+                    
+                document.getElementById('grounded').textContent = 
+                    this.player.isGrounded ? 'true' : 'false';
+                    
+                if (playerRb?.body) {
+                    const vel = playerRb.body.velocity;
+                    document.getElementById('velocity').textContent = 
+                        `${Math.round(vel.x)}, ${Math.round(vel.y)}`;
+                }
+            }
+        }
+        
+        // Start the game when page loads
+        window.addEventListener('load', () => {
+            new PlatformerGame();
+        });
+    </script>
+</body>
+</html>
